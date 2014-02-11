@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>SA Cell Usage</title>
+    <script src="libraries/RGraph.common.core.js" ></script>
+    <script src="libraries/RGraph.common.dynamic.js" ></script>
+    <script src="libraries/RGraph.common.tooltips.js" ></script>
+    <script src="libraries/RGraph.common.effects.js" ></script>
+    <script src="libraries/RGraph.common.context.js" ></script>
+    <script src="libraries/RGraph.line.js" ></script>
+    <script src="libraries/RGraph.pie.js" ></script>
+
+</head>
+<body>
+<!--
+<h1>Real-time SA Cell Usage For Last 500 Mins(update every 30s)</h1>
+<HR>
+-->
+<h3>Usage For Last 500 Mins(update every 30s)</h3>
+<canvas id="instances" width="800" height="150" >[No canvas support]</canvas> 
+<canvas id="vcpus" width="800" height="150" >[No canvas support]</canvas> 
+<canvas id="vcpus_per_instance" width="800" height="150" >[No canvas support]</canvas> 
+<canvas id="users" width="800" height="150" >[No canvas support]</canvas> 
+<canvas id="tenants" width="800" height="150" >[No canvas support]</canvas> 
+<script>
+</script>
+<br>
+    <script>
+	var maxlength = 1000;
+        window.onload = function (e)
+        {
+	var d1 = [];
+	var chartConf = [];
+	chartConf['instances'] = ['0','red','rgba\(255\,0\,0\,0.3\)'];
+	chartConf['vcpus'] = ['0','blue','rgba\(0\,0\,255\,0.3\)'];
+	chartConf['vcpus_per_instance'] = ['0','orange','rgba\(255\,128\,0\,0.3\)'];
+	chartConf['users'] = ['0','green','rgba\(0\,255\,0\,0.3\)'];
+	chartConf['tenants'] = ['0','yellow','rgba\(255\,255\,0\,0.3\)'];
+	var myChartArr = ['instances','vcpus','vcpus_per_instance','users','tenants'];
+	for (var i = 0;i <myChartArr.length ;i++ ) {
+		//document.getElementById('test').innerHTML = myChartArr[i];
+		d1[myChartArr[i]] = [];
+		/*for (var j=0; i<maxlength; ++j) {
+			d1[myChartArr[i]].push('NULL');
+		}*/
+	}
+	 /*   var d1 = [];	    
+	    d1['instances'] = [];
+	    d1['vcpus'] = [];
+
+	    for (var i=0; i<maxlength; ++i) {
+             	d1['instances'].push('NULL');
+             	d1['vcpus'].push('NULL');
+            }*/
+       	    socket = new WebSocket("ws://"+window.location.hostname+":8998/sausage-line");//Establish Websocket connection to the server
+
+            function getGraph(id, d1)
+            {
+		var now = new Date()
+		var timestr = now.toLocaleTimeString() + " " +  now.toLocaleDateString()
+                var graph = new RGraph.Line(id, d1)
+		.Set('background.color','rgba(255,255,255,0.2)')
+		//.Set('fillstyle','rgba(255,0,0,0.2)')
+		.Set('fillstyle',[chartConf[id][2]])
+                .Set('title.yaxis', id)
+                .Set('title.vpos', 0.6)
+                .Set('title.hpos', 0.5)
+                //.Set('chart.title', 'Latest Value : '+d1)
+                .Set('title', id + ': '+d1[d1.length-1])
+                .Set('title.yaxis.pos', 0.5)
+                .Set('title.xaxis.pos', 0.5)
+                .Set('gutter.right', 50)
+                .Set('gutter.left', 50)
+                .Set('colors', [chartConf[id][1]])
+                .Set('linewidth', 2)
+                .Set('yaxispos', 'right')
+                .Set('ymax', [chartConf[id][0]])
+                .Set('xticks', 20)
+                .Set('filled', true)
+		.Set('labels',[0,0,0,0,0,0,0,0,0,'Updated at '+timestr,0])
+                .Set('shadow', true);
+                return graph;
+            }
+	    //var init_graph = getGraph('cvs', d1).Draw();
+        
+            function drawGraph (key,str)
+            {
+                RGraph.Clear(document.getElementById(key));
+		var newstr = str.replace("[","");	
+		newstr = newstr.replace("]","");	
+		newstr = newstr.replace(/'/g,"");
+		init_d1 = newstr.split(",")
+		if (init_d1.length > 1) {
+			for ( i=init_d1.length-maxlength; i< init_d1.length;i++ ) {
+				if (chartConf[key][0] < parseFloat(init_d1[i])) {
+					chartConf[key][0] = parseFloat(init_d1[i])*1.5;
+				} 
+				d1[key].push(parseFloat(init_d1[i]));
+                	/*if (d1.length > maxlength) {
+                		d1 = RGraph.array_shift(d1);
+                	}*/
+			}
+		} else {
+			d1[key].push(parseFloat(init_d1[0]));
+		}
+		if ( d1[key].length > maxlength ) {
+			d1[key].shift();
+		} 
+
+		//document.title = String(d1[d1.length-1]) + " | SA Cell Usage";
+                var realtimeLine = getGraph(key,d1[key]).Draw();
+            }
+            socket.onmessage = function (event)  { //if recieve message from server side then draw graph
+		var data_arr = event.data.split(":");
+                drawGraph(data_arr[0],data_arr[1]);
+       	    };
+        }
+    </script>
+<br>
+<br>
+<br>
+<p id="test"></p>
+</body>
+</html>

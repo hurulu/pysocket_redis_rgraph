@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>SA Cell Usage</title>
+    <script src="libraries/RGraph.common.core.js" ></script>
+    <script src="libraries/RGraph.common.dynamic.js" ></script>
+    <script src="libraries/RGraph.common.tooltips.js" ></script>
+    <script src="libraries/RGraph.common.effects.js" ></script>
+    <script src="libraries/RGraph.common.key.js" ></script>
+    <script src="libraries/RGraph.drawing.rect.js" ></script>
+    <script src="libraries/RGraph.pie.js" ></script>
+
+</head>
+<body>
+<table>
+<tr>
+<h1 style="width:1500px;text-align:left;">Real-time SA Cell Usage | Cores Used by Organisations </h1>
+<HR>
+</tr>
+<tr>
+<td style="width:1000px;text-align:top;">
+<div ><canvas id="vcpus_by_org" width="1000" height="650" >[No canvas support]</canvas></div>
+</td>
+<td style="width:500px;text-align:top;">
+</td>
+</tr>
+<tr>
+<td id="test"></td>
+</tr>
+</table>
+<script>
+</script>
+<br>
+    <script>
+        window.onload = function (e)
+        {
+	    var socket = new WebSocket("ws://"+window.location.hostname+":8998/sausage-pie");//Establish Websocket connection to the server
+	    function drawPie (key,data) {
+		RGraph.Clear(document.getElementById(key));
+		var newstr = data.replace("{","").replace("}","").replace(/'/g,"").split(",");	
+		var key_list = [];
+		var value_list = [];
+		var tooltip_list = [];
+		for ( i = 0; i<newstr.length; i++ ) {
+			var tmp_arr = newstr[i].split(":");
+			key_list.push(tmp_arr[0]);
+			value_list.push(parseInt(tmp_arr[1]));
+			tooltip_list.push(tmp_arr[0]+" ("+value_list[i]+")");
+		}
+		//document.getElementById('test').innerHTML = key_list ;
+		var pie = new RGraph.Pie(key, value_list)
+		//.Set('title',"Cores Used by Oranisations")
+		.Set('title.y', 30)
+		.Set('key',key_list)
+		.Set('key',tooltip_list)
+		.Set('key.colors')
+		.Set('key.interactive', true)
+		.Set('key.interactive.highlight.chart.fill', 'rgba(255,255,255,0.8)')
+		.Set('key.interactive.highlight.chart.stroke', 'rgba(255,255,255,0.8)')
+		//.Set('key.interactive.highlight.label', 'rgba(255,255,255,0.8)')
+		.Set('key.position.x', 0)
+                .Set('key.position.y', 0)
+                .Set('radius', 300)
+		//.Set('gutter.right', 200)
+                //.Set('gutter.left', 200)
+                //.Set('gutter.top', 200)
+                //.Set('gutter.bottom', 200)
+		//.Set('exploded',10)
+		//.Set('key.position', 'gutter')
+		//.Set('key.position.y', 100)
+                .Set('tooltips', tooltip_list)
+                .Set('tooltips.event', 'onmousemove')
+                //.Set('labels', key_list)
+                //.Set('labels.colors', ['white'])
+		//.Set('labels.sticks', true)
+                //.Set('labels.sticks.length', 100)
+                .Draw();
+
+	    }
+            socket.onmessage = function (event)  { //if recieve message from server side then draw graph
+		var data_arr = event.data.split("::");
+		if ( data_arr[0] == "vcpus_by_org" ) {
+			drawPie(data_arr[0],data_arr[1]);
+		} 
+       	    };
+        }
+    </script>
+</body>
+</html>
