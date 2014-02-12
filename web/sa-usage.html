@@ -17,7 +17,7 @@
 <h1>Real-time SA Cell Usage For Last 500 Mins(update every 30s)</h1>
 <HR>
 -->
-<h3>Usage For Last 500 Mins(update every 30s)</h3>
+<h3>Usage For Last 10 Hours(update every 30s)</h3>
 <canvas id="instances" width="800" height="150" >[No canvas support]</canvas> 
 <canvas id="vcpus" width="800" height="150" >[No canvas support]</canvas> 
 <canvas id="vcpus_per_instance" width="800" height="150" >[No canvas support]</canvas> 
@@ -27,7 +27,7 @@
 </script>
 <br>
     <script>
-	var maxlength = 1000;
+	var maxlength = 1200;
         window.onload = function (e)
         {
 	var d1 = [];
@@ -58,7 +58,13 @@
             function getGraph(id, d1)
             {
 		var now = new Date()
-		var timestr = now.toLocaleTimeString() + " " +  now.toLocaleDateString()
+		//var timestr = now.toLocaleTimeString() + " " +  now.toLocaleDateString()
+		var timestr = now.toLocaleTimeString()
+		var start_time = new Date()
+		start_time.setTime(now.getTime() - 1200000*30);
+		var mid_time = new Date()
+		mid_time.setTime(now.getTime() - 600000*30);
+		
                 var graph = new RGraph.Line(id, d1)
 		.Set('background.color','rgba(255,255,255,0.2)')
 		//.Set('fillstyle','rgba(255,0,0,0.2)')
@@ -76,9 +82,9 @@
                 .Set('linewidth', 2)
                 .Set('yaxispos', 'right')
                 .Set('ymax', [chartConf[id][0]])
-                .Set('xticks', 20)
+                .Set('xticks', 10)
                 .Set('filled', true)
-		.Set('labels',[0,0,0,0,0,0,0,0,0,'Updated at '+timestr,0])
+		.Set('labels',[start_time.toLocaleTimeString(),0,0,0,0,mid_time.toLocaleTimeString(),0,0,0,0,timestr])
                 .Set('shadow', true);
                 return graph;
             }

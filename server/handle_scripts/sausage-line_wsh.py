@@ -41,7 +41,7 @@ def web_socket_do_extra_handshake(request):
 
 def web_socket_transfer_data(request):
     length = {}
-    maxlength = 1000
+    maxlength = 1200
     key_list = ['instances','vcpus','vcpus_per_instance','users','tenants']
     for i in key_list:
 	key = 'sa:usage:' + i
