@@ -72,6 +72,7 @@
                 .Set('key.position.y', 0)
                 .Set('radius', 300)
                 .Set('exploded',explode_list)
+                .Set('shadow',true)
 		//.Set('gutter.right', 200)
                 //.Set('gutter.left', 200)
                 //.Set('gutter.top', 200)
@@ -86,7 +87,6 @@
 		//.Set('labels.sticks', true)
                 //.Set('labels.sticks.length', 100)
                 .Draw();
-
 	    }
             socket.onmessage = function (event)  { //if recieve message from server side then draw graph
 		var data_arr = event.data.split("::");
