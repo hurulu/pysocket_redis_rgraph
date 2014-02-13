@@ -35,7 +35,7 @@
     <script>
         window.onload = function (e)
         {
-	    var chartColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,255,0)','rgb(0,255,255)','rgb(255,0,255)','rgb(192,192,192)','rgb(255,255,255)','rgb(240,0,0)','rgb(0,240,0)','rgb(0,0,2240)','rgb(240,240,0)','rgb(0,240,240)','rgb(240,0,240)','rgb(200,150,150)','rgb(240,240,240)','rgb(125,0,0)','rgb(0,125,0)','rgb(0,0,125)','rgb(125,125,0)','rgb(0,125,125)','rgb(125,0,125)','rgb(50,50,50)','rgb(125,125,125)'];
+	    var chartColors = ['rgb(255,0,0)','rgb(0,255,0)','rgb(0,0,255)','rgb(255,255,0)','rgb(0,255,255)','rgb(255,0,255)','rgb(192,192,192)','rgb(255,255,255)','rgb(240,0,0)','rgb(0,240,0)','rgb(0,0,2240)','rgb(240,240,0)','rgb(0,240,240)','rgb(240,0,240)','rgb(200,150,150)','rgb(240,240,240)','rgb(125,0,0)','rgb(0,125,0)','rgb(0,0,125)','rgb(125,125,0)','rgb(0,125,125)','rgb(125,0,125)','rgb(255,150,50)','rgb(125,125,125)'];
 	    var socket = new WebSocket("ws://"+window.location.hostname+":8998/sausage-pie");//Establish Websocket connection to the server
 	    function drawPie (key,data) {
 		RGraph.Clear(document.getElementById(key));
@@ -43,11 +43,18 @@
 		var key_list = [];
 		var value_list = [];
 		var tooltip_list = [];
+		var explode_list = [];
 		for ( i = 0; i<newstr.length; i++ ) {
 			var tmp_arr = newstr[i].split(":");
-			key_list.push(tmp_arr[0]);
+			var org_name = tmp_arr[0].replace(" ","");
+			key_list.push(org_name);
+			if ( org_name == "adelaide.edu.au" ) {
+				explode_list.push(15)
+			} else {
+				explode_list.push(0)
+			}
 			value_list.push(parseInt(tmp_arr[1]));
-			tooltip_list.push(tmp_arr[0]+" ("+value_list[i]+")");
+			tooltip_list.push(org_name+" ("+value_list[i]+")");
 		}
 		//document.getElementById('test').innerHTML = key_list ;
 		var pie = new RGraph.Pie(key, value_list)
@@ -64,6 +71,7 @@
 		.Set('key.position.x', 0)
                 .Set('key.position.y', 0)
                 .Set('radius', 300)
+                .Set('exploded',explode_list)
 		//.Set('gutter.right', 200)
                 //.Set('gutter.left', 200)
                 //.Set('gutter.top', 200)
